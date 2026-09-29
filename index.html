@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1d3557">
+<title>Quality Inn &amp; Suites Sandusky — Room Status</title>
+<style>
+:root{--perfect:#92D050;--good:#FFEB84;--bad:#F8696B;--unchk:#FFFFFF;--area:#D9DCE1;--ink:#1f2933;--muted:#6b7580;--navy:#1d3557;--line:#46505a;--bg:#f3f5f8}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%}
+header{background:var(--navy);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 14px 10px}
+header h1{margin:0;font-size:17px;line-height:1.25;font-weight:700;letter-spacing:.1px}
+header .stamp{margin-top:3px;font-size:11.5px;opacity:.8}
+.wrap{padding:10px 10px 0}
+.card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:10px 12px;margin-bottom:10px}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;font-size:12.5px}
+.legend div{display:flex;align-items:center;gap:7px;line-height:1.2}
+.sw{flex:0 0 auto;width:18px;height:18px;border-radius:4px;border:1px solid rgba(0,0,0,.35)}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}
+.summary .n{font-size:20px;font-weight:700;line-height:1.1}
+.summary .l{font-size:11px;color:var(--muted)}
+.summary > div{border-radius:8px;padding:6px 2px;border:1px solid rgba(0,0,0,.12)}
+.prog{margin-top:9px;display:flex;align-items:center;gap:10px;font-size:13px}
+.bar{flex:1;height:10px;border-radius:5px;background:#e6e9ee;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#5aa02c,#92D050)}
+.prog b{font-size:15px}
+.tabs{display:flex;gap:6px;margin-bottom:8px;position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0}
+.tabs button{flex:1;border:1px solid #c5ccd6;background:#fff;border-radius:10px;padding:8px 6px;font-size:15px;font-weight:600;color:var(--ink);font-family:inherit}
+.tabs button small{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-top:1px}
+.tabs button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.tabs button.on small{color:#cfd8e3}
+.tools{display:flex;align-items:center;gap:6px;margin:0 0 6px;font-size:12px;color:var(--muted)}
+.tools button{border:1px solid #c5ccd6;background:#fff;border-radius:8px;min-width:38px;height:34px;font-size:17px;font-weight:600;color:var(--ink);font-family:inherit}
+.tools button.fit{font-size:13px;padding:0 10px}
+.tools input{flex:1;min-width:0;height:34px;border:1px solid #c5ccd6;border-radius:8px;padding:0 9px;font-size:16px;font-family:inherit;margin-left:4px}
+.tools button.go{border:0;background:var(--navy);color:#fff;font-size:15px;padding:0 12px}
+.hint{font-size:11.5px;color:var(--muted);margin:0 2px 6px}
+#mapbox{overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:8px;max-height:calc(100vh - 120px)}
+#mapbox svg{display:block}
+.room{cursor:pointer}
+.room rect{stroke:var(--line);stroke-width:.09}
+.room.sel rect{stroke:#0b5cff;stroke-width:.35}
+.area rect,.area path{fill:var(--area);stroke:var(--line);stroke-width:.09}
+.lbl{font-weight:700;fill:#111;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.typ{font-weight:500;fill:#333;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.alb{fill:#4b5560;text-anchor:middle;dominant-baseline:central;pointer-events:none;font-weight:500}
+.ttl rect{fill:#fff;stroke:#555;stroke-width:.1}
+.ttl text{fill:#222;text-anchor:middle;dominant-baseline:central;font-weight:500}
+footer{font-size:11px;color:var(--muted);text-align:center;padding:12px 10px calc(16px + env(safe-area-inset-bottom))}
+/* bottom sheet */
+#ov{position:fixed;inset:0;background:rgba(15,23,35,.45);opacity:0;pointer-events:none;transition:opacity .18s;z-index:20}
+#ov.show{opacity:1;pointer-events:auto}
+#sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;background:#fff;border-radius:16px 16px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.2);max-height:82vh;overflow:auto;-webkit-overflow-scrolling:touch;transform:translateY(105%);visibility:hidden;transition:transform .22s ease,visibility 0s linear .22s;padding:6px 16px calc(18px + env(safe-area-inset-bottom))}
+#sheet.show{transform:translateY(0);visibility:visible;transition:transform .22s ease,visibility 0s}
+@media (min-width:700px){#sheet{left:50%;right:auto;width:560px;margin-left:-280px}}
+.grab{width:40px;height:5px;border-radius:3px;background:#cfd4da;margin:4px auto 8px}
+.sh-head{display:flex;align-items:flex-start;gap:10px}
+.sh-head h2{margin:0;font-size:24px;line-height:1.1}
+.sh-head .tc{display:inline-block;margin-top:5px;font-size:13px;font-weight:600;background:#eef1f5;border:1px solid #d5dbe3;border-radius:6px;padding:2px 7px;color:#333}
+.x{margin-left:auto;border:0;background:#eef1f5;width:38px;height:38px;border-radius:19px;font-size:22px;line-height:38px;color:#333;padding:0;font-family:inherit}
+.badge{display:inline-block;font-size:13px;font-weight:700;border-radius:14px;padding:4px 11px;border:1px solid rgba(0,0,0,.25);color:#1b1b1b}
+.meta{display:flex;align-items:center;gap:10px;margin:10px 0 6px;flex-wrap:wrap}
+.meta .cnt{font-size:14px;font-weight:600}
+.mini{height:8px;border-radius:4px;background:#e6e9ee;overflow:hidden;margin-bottom:8px}
+.mini i{display:block;height:100%}
+.sec h3{margin:14px 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.sec ul{list-style:none;margin:0;padding:0}
+.sec li{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:8px;margin-bottom:5px;font-size:15px;line-height:1.3}
+.sec li .ic{flex:0 0 auto;font-weight:800;width:16px;text-align:center}
+.need li{background:#fdeceb}
+.need li .ic{color:#c62828}
+.fixd li{background:#eef8e4}
+.fixd li .ic{color:#3d8b1f}
+.sec li b{font-weight:650}
+.none{font-size:14px;color:var(--muted);padding:2px 2px 4px}
+.blank{font-size:12.5px;color:var(--muted);margin:2px 2px 0;font-style:italic}
+.notes{background:#f5f7fa;border-left:4px solid #9aa5b1;padding:8px 10px;border-radius:6px;font-size:14.5px;white-space:pre-wrap}
+.unc{background:#f5f7fa;border:1px dashed #b9c1cb;border-radius:10px;padding:18px 12px;text-align:center;font-size:17px;font-weight:600;color:#56606b;margin-top:10px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Quality Inn &amp; Suites Sandusky — Room Status</h1>
+  <div class="stamp">Last updated Sep 29, 2026 12:05 PM ET</div>
+</header>
+<div class="wrap">
+  <div class="card legend" aria-label="Color key">
+    <div><span class="sw" style="background:var(--perfect)"></span><span><b>Perfect</b> – all 10 done</span></div>
+    <div><span class="sw" style="background:var(--good)"></span><span><b>Good</b> – 7–9 done</span></div>
+    <div><span class="sw" style="background:var(--bad)"></span><span><b>Bad</b> – 6 or fewer</span></div>
+    <div><span class="sw" style="background:var(--unchk)"></span><span><b>White</b> – not checked yet</span></div>
+  </div>
+  <div class="card">
+    <div class="summary" id="sum"></div>
+    <div class="prog"><span>Overall</span><div class="bar"><i id="pbar"></i></div><b id="ppct"></b></div>
+  </div>
+  <div class="tabs" role="tablist">
+    <button id="t1" role="tab" data-f="1">Floor 1<small id="s1"></small></button>
+    <button id="t2" role="tab" data-f="2">Floor 2<small id="s2"></small></button>
+  </div>
+  <div class="tools">
+    <button id="zo" aria-label="Zoom out">−</button><button id="zi" aria-label="Zoom in">+</button><button id="zf" class="fit">Fit</button>
+    <input id="q" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Room #" autocomplete="off" aria-label="Go to room number"><button id="go" class="go">Go</button>
+  </div>
+  <div class="hint">Tap a room for details · pinch or drag the map to zoom / move</div>
+  <div id="mapbox"><svg id="map" xmlns="http://www.w3.org/2000/svg"></svg></div>
+</div>
+<footer>Colors come from the ✓ Done boxes in the Room Needs sheet (10 items per room). Built from Quality_Inn_Sandusky_Room_Needs.xlsx.</footer>
+<div id="ov"></div>
+<div id="sheet" role="dialog" aria-modal="true" aria-hidden="true"><div class="grab"></div><div id="sc"></div></div>
+<script>
+const DATA = {"W":77,"H":51,"floors":{"1":[{"kind":"title","label":"First Floor","x":12,"y":5,"w":24,"h":7},{"kind":"area","label":"Pool","x":16,"y":23,"w":20,"h":9,"vertical":false,"poly":[[16,23],[36,23],[36,34],[32,34],[32,32],[16,32]],"rects":[[32,32,4,2]]},{"kind":"area","label":"Stair","x":0,"y":34,"w":2,"h":8,"vertical":true},{"kind":"area","label":"Storage","x":2,"y":34,"w":2,"h":8,"vertical":true},{"kind":"room","room":102,"x":4,"y":34,"w":4,"h":8},{"kind":"room","room":104,"x":8,"y":34,"w":4,"h":8},{"kind":"room","room":106,"x":12,"y":34,"w":4,"h":8},{"kind":"room","room":108,"x":16,"y":34,"w":4,"h":8},{"kind":"room","room":110,"x":20,"y":34,"w":4,"h":8},{"kind":"area","label":"Breakfast","x":24,"y":34,"w":12,"h":8,"vertical":false},{"kind":"room","room":101,"x":0,"y":43,"w":4,"h":8},{"kind":"room","room":103,"x":4,"y":43,"w":4,"h":8},{"kind":"room","room":105,"x":8,"y":43,"w":4,"h":8},{"kind":"room","room":107,"x":12,"y":43,"w":4,"h":8},{"kind":"room","room":109,"x":16,"y":43,"w":4,"h":8},{"kind":"room","room":111,"x":20,"y":43,"w":4,"h":8},{"kind":"room","room":113,"x":24,"y":43,"w":4,"h":8},{"kind":"area","label":"Lobby","x":28,"y":43,"w":4,"h":8,"vertical":false},{"kind":"area","label":"Bath","x":38,"y":34,"w":2,"h":4,"vertical":true},{"kind":"area","label":"Stair","x":38,"y":38,"w":2,"h":4,"vertical":true},{"kind":"room","room":116,"x":40,"y":34,"w":4,"h":8},{"kind":"room","room":118,"x":44,"y":34,"w":4,"h":8},{"kind":"room","room":120,"x":48,"y":34,"w":4,"h":8},{"kind":"room","room":122,"x":52,"y":34,"w":4,"h":8},{"kind":"room","room":124,"x":56,"y":34,"w":4,"h":8},{"kind":"area","label":"Vend","x":62,"y":34,"w":2,"h":4,"vertical":true},{"kind":"area","label":"LA","x":62,"y":38,"w":2,"h":4,"vertical":true},{"kind":"room","room":126,"x":64,"y":34,"w":5,"h":8},{"kind":"room","room":128,"x":69,"y":34,"w":4,"h":8},{"kind":"area","label":"Stair","x":73,"y":34,"w":4,"h":17,"vertical":true},{"kind":"area","label":"FD","x":36,"y":43,"w":4,"h":4,"vertical":true},{"kind":"area","label":"Office","x":38,"y":47,"w":2,"h":4,"vertical":true},{"kind":"area","label":"Laundry","x":40,"y":43,"w":4,"h":8,"vertical":true},{"kind":"room","room":117,"x":44,"y":43,"w":4,"h":8},{"kind":"room","room":119,"x":48,"y":43,"w":4,"h":8},{"kind":"room","room":121,"x":52,"y":43,"w":4,"h":8},{"kind":"room","room":123,"x":56,"y":43,"w":4,"h":8},{"kind":"room","room":125,"x":60,"y":43,"w":4,"h":8},{"kind":"room","room":127,"x":64,"y":43,"w":5,"h":8},{"kind":"room","room":129,"x":69,"y":43,"w":4,"h":8},{"kind":"area","label":"HK Closet","x":52,"y":0,"w":8,"h":2,"vertical":false},{"kind":"room","room":130,"x":52,"y":26,"w":8,"h":4},{"kind":"room","room":132,"x":52,"y":22,"w":8,"h":4},{"kind":"room","room":134,"x":48,"y":18,"w":12,"h":4},{"kind":"room","room":136,"x":48,"y":14,"w":12,"h":4},{"kind":"room","room":138,"x":48,"y":10,"w":12,"h":4},{"kind":"room","room":140,"x":52,"y":6,"w":8,"h":4},{"kind":"room","room":142,"x":52,"y":2,"w":8,"h":4},{"kind":"line","x1":56,"y1":30,"x2":56,"y2":34},{"kind":"area","label":"Stair","x":62,"y":0,"w":8,"h":2,"vertical":false},{"kind":"room","room":131,"x":62,"y":26,"w":8,"h":4},{"kind":"room","room":133,"x":62,"y":22,"w":8,"h":4},{"kind":"room","room":135,"x":62,"y":18,"w":12,"h":4},{"kind":"room","room":137,"x":62,"y":14,"w":12,"h":4},{"kind":"room","room":139,"x":62,"y":10,"w":12,"h":4},{"kind":"room","room":141,"x":62,"y":6,"w":8,"h":4},{"kind":"room","room":143,"x":62,"y":2,"w":8,"h":4},{"kind":"area","label":"Storage","x":62,"y":30,"w":8,"h":2,"vertical":false},{"kind":"area","label":"Elevator","x":62,"y":32,"w":8,"h":2,"vertical":false}],"2":[{"kind":"title","label":"Second Floor","x":12,"y":5,"w":24,"h":7},{"kind":"area","label":"Stairs","x":0,"y":34,"w":2,"h":8,"vertical":true},{"kind":"area","label":"Maintenance","x":2,"y":34,"w":2,"h":8,"vertical":true},{"kind":"room","room":202,"x":4,"y":34,"w":4,"h":8},{"kind":"room","room":204,"x":8,"y":34,"w":4,"h":8},{"kind":"room","room":206,"x":12,"y":34,"w":4,"h":8},{"kind":"room","room":208,"x":16,"y":34,"w":4,"h":8},{"kind":"room","room":210,"x":20,"y":34,"w":4,"h":8},{"kind":"room","room":212,"x":24,"y":34,"w":4,"h":8},{"kind":"room","room":214,"x":28,"y":34,"w":4,"h":8},{"kind":"room","room":216,"x":32,"y":34,"w":4,"h":8},{"kind":"area","label":"Boiler","x":36,"y":33,"w":2,"h":5,"vertical":true},{"kind":"area","label":"Vend","x":36,"y":38,"w":2,"h":4,"vertical":true},{"kind":"area","label":"Stair","x":38,"y":34,"w":2,"h":8,"vertical":true},{"kind":"room","room":220,"x":40,"y":34,"w":4,"h":8},{"kind":"room","room":222,"x":44,"y":34,"w":4,"h":8},{"kind":"room","room":224,"x":48,"y":34,"w":4,"h":8},{"kind":"room","room":226,"x":52,"y":34,"w":4,"h":8},{"kind":"room","room":228,"x":56,"y":34,"w":4,"h":8},{"kind":"area","label":"Vend","x":62,"y":34,"w":2,"h":4,"vertical":true},{"kind":"area","label":"Heat","x":62,"y":38,"w":2,"h":4,"vertical":true},{"kind":"room","room":230,"x":64,"y":34,"w":5,"h":8},{"kind":"room","room":232,"x":69,"y":34,"w":4,"h":8},{"kind":"area","label":"Stair","x":73,"y":34,"w":4,"h":17,"vertical":true},{"kind":"room","room":201,"x":0,"y":43,"w":4,"h":8},{"kind":"room","room":203,"x":4,"y":43,"w":4,"h":8},{"kind":"room","room":205,"x":8,"y":43,"w":4,"h":8},{"kind":"room","room":207,"x":12,"y":43,"w":4,"h":8},{"kind":"room","room":209,"x":16,"y":43,"w":4,"h":8},{"kind":"room","room":211,"x":20,"y":43,"w":4,"h":8},{"kind":"room","room":213,"x":24,"y":43,"w":4,"h":8},{"kind":"room","room":215,"x":28,"y":43,"w":4,"h":8},{"kind":"room","room":217,"x":32,"y":43,"w":4,"h":8},{"kind":"room","room":219,"x":36,"y":43,"w":4,"h":8},{"kind":"room","room":221,"x":40,"y":43,"w":4,"h":8},{"kind":"room","room":223,"x":44,"y":43,"w":4,"h":8},{"kind":"room","room":225,"x":48,"y":43,"w":4,"h":8},{"kind":"room","room":227,"x":52,"y":43,"w":4,"h":8},{"kind":"room","room":229,"x":56,"y":43,"w":4,"h":8},{"kind":"room","room":231,"x":60,"y":43,"w":4,"h":8},{"kind":"room","room":233,"x":64,"y":43,"w":5,"h":8},{"kind":"room","room":235,"x":69,"y":43,"w":4,"h":8},{"kind":"area","label":"Storage","x":52,"y":0,"w":8,"h":2,"vertical":false},{"kind":"room","room":236,"x":52,"y":26,"w":8,"h":4},{"kind":"room","room":238,"x":52,"y":22,"w":8,"h":4},{"kind":"room","room":240,"x":48,"y":18,"w":12,"h":4},{"kind":"room","room":242,"x":48,"y":14,"w":12,"h":4},{"kind":"room","room":244,"x":48,"y":10,"w":12,"h":4},{"kind":"room","room":246,"x":52,"y":6,"w":8,"h":4},{"kind":"room","room":248,"x":52,"y":2,"w":8,"h":4},{"kind":"line","x1":56,"y1":30,"x2":56,"y2":34},{"kind":"area","label":"Stair","x":62,"y":0,"w":8,"h":2,"vertical":false},{"kind":"room","room":237,"x":62,"y":26,"w":8,"h":4},{"kind":"room","room":239,"x":62,"y":22,"w":8,"h":4},{"kind":"room","room":241,"x":62,"y":18,"w":12,"h":4},{"kind":"room","room":243,"x":62,"y":14,"w":12,"h":4},{"kind":"room","room":245,"x":62,"y":10,"w":12,"h":4},{"kind":"room","room":247,"x":62,"y":6,"w":8,"h":4},{"kind":"room","room":249,"x":62,"y":2,"w":8,"h":4},{"kind":"area","label":"Store","x":62,"y":30,"w":8,"h":2,"vertical":false},{"kind":"area","label":"Elev","x":62,"y":32,"w":8,"h":2,"vertical":false}]},"rooms":{"101":{"n":101,"type":"NK","status":"Bad","done":6,"total":10,"need":[["Hair dryer","Needs bag"],["Bag / bracket","Bag"],["Curtains","Curtain issues"],["Other","Towel bar loose"]],"fixed":[],"blank":[],"notes":""},"102":{"n":102,"type":"NK","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"103":{"n":103,"type":"NQQ","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"]],"fixed":[],"blank":[],"notes":""},"104":{"n":104,"type":"NQQ","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"105":{"n":105,"type":"H NHQQ1","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"106":{"n":106,"type":"NQQ","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"107":{"n":107,"type":"H NKQQ1","status":"Perfect","done":10,"total":10,"need":[],"fixed":[["Curtains","Curtain issues"]],"blank":[],"notes":""},"108":{"n":108,"type":"NQQ","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"109":{"n":109,"type":"NK1","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"110":{"n":110,"type":"NHQQ1","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"111":{"n":111,"type":"NK1","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"]],"fixed":[],"blank":[],"notes":""},"113":{"n":113,"type":"NQQ","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"116":{"n":116,"type":"NQQ","status":"Perfect","done":10,"total":10,"need":[],"fixed":[["Curtains","Curtain issues"]],"blank":[],"notes":""},"117":{"n":117,"type":"NQQ","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"118":{"n":118,"type":"NQQ","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"119":{"n":119,"type":"H NQQ","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"120":{"n":120,"type":"NQQ","status":"Perfect","done":10,"total":10,"need":[],"fixed":[["Shower caddy","Caddy loose, tightened"]],"blank":[],"notes":""},"121":{"n":121,"type":"H NHQQ","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"122":{"n":122,"type":"NQQ","status":"Perfect","done":10,"total":10,"need":[],"fixed":[["Shower caddy","Caddy loose, tightened"],["Curtains","Curtain issues"]],"blank":[],"notes":""},"123":{"n":123,"type":"NK1","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"124":{"n":124,"type":"NQQ","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"125":{"n":125,"type":"NK1","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"126":{"n":126,"type":"NQQ","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"127":{"n":127,"type":"NQQ","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"128":{"n":128,"type":"NQQ","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"129":{"n":129,"type":"NQQ","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"130":{"n":130,"type":"NQQ","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"131":{"n":131,"type":"H NHK","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs hair dryer"]],"fixed":[],"blank":["Bag / bracket"],"notes":""},"132":{"n":132,"type":"NQQ","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"133":{"n":133,"type":"NQQ","status":"Perfect","done":10,"total":10,"need":[],"fixed":[["Shower caddy","Caddy loose, tightened"]],"blank":[],"notes":""},"134":{"n":134,"type":"SNQQ","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"135":{"n":135,"type":"SNQQ","status":"Good","done":7,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"],["Curtains","No curtains"]],"fixed":[],"blank":[],"notes":""},"136":{"n":136,"type":"SNQQ","status":"Good","done":7,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"],["Curtains","Needs curtains"]],"fixed":[],"blank":[],"notes":""},"137":{"n":137,"type":"SNQQ","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs bag"],["Bag / bracket","Bag"]],"fixed":[["Closet door","Needs repair"]],"blank":[],"notes":""},"138":{"n":138,"type":"SNK","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"]],"fixed":[],"blank":[],"notes":""},"139":{"n":139,"type":"SNQQ","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs bag"],["Bag / bracket","Bag"]],"fixed":[],"blank":[],"notes":""},"140":{"n":140,"type":"NQQ","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs bag"],["Bag / bracket","Bag"]],"fixed":[["Lotion dispenser","Y"]],"blank":[],"notes":""},"141":{"n":141,"type":"NQQ","status":"Good","done":7,"total":10,"need":[["Hair dryer","Needs bag"],["Bag / bracket","Bag"],["Curtains","Needs curtains"]],"fixed":[],"blank":[],"notes":""},"142":{"n":142,"type":"NQQ","status":"Good","done":9,"total":10,"need":[["Curtains","Needs curtains"]],"fixed":[],"blank":[],"notes":""},"143":{"n":143,"type":"NQQ","status":"Good","done":7,"total":10,"need":[["Hair dryer","Needs bag"],["Bag / bracket","Bag"],["Curtains","No curtains"]],"fixed":[],"blank":[],"notes":""},"201":{"n":201,"type":"NQQ","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"]],"fixed":[],"blank":[],"notes":""},"202":{"n":202,"type":"NQQ","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"]],"fixed":[["Lotion dispenser","Y"]],"blank":[],"notes":""},"203":{"n":203,"type":"NQQ","status":"Good","done":7,"total":10,"need":[["Hair dryer","Needs bag"],["Bag / bracket","Bag"],["Curtains","Holes in curtains"]],"fixed":[],"blank":[],"notes":""},"204":{"n":204,"type":"NQQ","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"]],"fixed":[],"blank":[],"notes":""},"205":{"n":205,"type":"NQQ1","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"]],"fixed":[],"blank":[],"notes":""},"206":{"n":206,"type":"NQQ","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"]],"fixed":[],"blank":[],"notes":""},"207":{"n":207,"type":"NQQ1","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs bag"],["Bag / bracket","Bag"]],"fixed":[["Other","Dresser drawer"]],"blank":[],"notes":""},"208":{"n":208,"type":"NQQ","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"]],"fixed":[],"blank":[],"notes":""},"209":{"n":209,"type":"NQQ1","status":"Good","done":7,"total":10,"need":[["Hair dryer","Needs bag"],["Bag / bracket","Bag"],["Other","New lampshade"]],"fixed":[],"blank":[],"notes":""},"210":{"n":210,"type":"NQQ","status":"Good","done":7,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"],["Shower caddy","Needs soap holder"]],"fixed":[],"blank":[],"notes":""},"211":{"n":211,"type":"NQQ1","status":"Bad","done":6,"total":10,"need":[["Hair dryer","Needs bag"],["Bag / bracket","Bag"],["Curtains","Needs curtains"],["Lotion dispenser","Y"]],"fixed":[],"blank":[],"notes":""},"212":{"n":212,"type":"NQQ","status":"Good","done":7,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"],["Curtains","Curtain issues"]],"fixed":[],"blank":[],"notes":""},"213":{"n":213,"type":"NQQ","status":"Bad","done":6,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"],["Curtains","Curtain issues"],["PTAC unit","PTAC issues"]],"fixed":[],"blank":[],"notes":""},"214":{"n":214,"type":"NQQ","status":"Good","done":7,"total":10,"need":[["Hair dryer","Needs bag"],["Bag / bracket","Bag"],["Curtains","Curtain issues"]],"fixed":[],"blank":[],"notes":""},"215":{"n":215,"type":"NQQ1","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs hair dryer"]],"fixed":[],"blank":["Bag / bracket"],"notes":""},"216":{"n":216,"type":"NK","status":"Good","done":7,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"],["Lotion dispenser","Y"]],"fixed":[],"blank":[],"notes":""},"217":{"n":217,"type":"NQQ1","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"]],"fixed":[],"blank":[],"notes":""},"219":{"n":219,"type":"NQQ1","status":"Good","done":7,"total":10,"need":[["Hair dryer","Needs bag"],["Bag / bracket","Bag"],["Door","Hard to open"]],"fixed":[],"blank":[],"notes":""},"220":{"n":220,"type":"NQQ","status":"Bad","done":6,"total":10,"need":[["Hair dryer","Needs bag"],["Bag / bracket","Bag"],["Shower caddy","Needs soap holder (caddy tightened)"],["Curtains","Curtain issues"]],"fixed":[],"blank":[],"notes":""},"221":{"n":221,"type":"NQQ1","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs bag"],["Bag / bracket","Bag"]],"fixed":[],"blank":[],"notes":""},"222":{"n":222,"type":"NQQ","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"]],"fixed":[],"blank":[],"notes":""},"223":{"n":223,"type":"NQQ","status":"Good","done":7,"total":10,"need":[["Hair dryer","Needs bag"],["Bag / bracket","Bag"],["PTAC unit","PTAC issues"]],"fixed":[],"blank":[],"notes":""},"224":{"n":224,"type":"NQQ","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs bag"],["Bag / bracket","Bag"]],"fixed":[["Closet door","Needs repair"]],"blank":[],"notes":""},"225":{"n":225,"type":"NQQ","status":"Bad","done":6,"total":10,"need":[["Hair dryer","Needs bag"],["Bag / bracket","Bag"],["Curtains","Curtain issues"],["Lotion dispenser","Y"]],"fixed":[],"blank":[],"notes":""},"226":{"n":226,"type":"NQQ","status":"Good","done":7,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"],["Curtains","Curtain issues"]],"fixed":[],"blank":[],"notes":""},"227":{"n":227,"type":"NQQ1","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"]],"fixed":[],"blank":[],"notes":""},"228":{"n":228,"type":"NQQ","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"229":{"n":229,"type":"NQQ1","status":"Good","done":7,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"],["Curtains","Curtain issues"]],"fixed":[],"blank":[],"notes":""},"230":{"n":230,"type":"NQQ","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"231":{"n":231,"type":"NQQ1","status":"Bad","done":6,"total":10,"need":[["Hair dryer","Needs hair dryer"],["Shower caddy","Needs soap holder"],["Curtains","Curtain issues"]],"fixed":[],"blank":["Bag / bracket"],"notes":""},"232":{"n":232,"type":"NQQ","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs bag"],["Bag / bracket","Bag"]],"fixed":[],"blank":[],"notes":""},"233":{"n":233,"type":"NQQ","status":"Good","done":7,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"],["Curtains","No curtains"]],"fixed":[],"blank":[],"notes":""},"235":{"n":235,"type":"NQQ","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs bag"],["Bag / bracket","Bag"]],"fixed":[],"blank":[],"notes":""},"236":{"n":236,"type":"NQQ","status":"Good","done":9,"total":10,"need":[["Lotion dispenser","Y"]],"fixed":[["Closet door","Needs repair"]],"blank":[],"notes":""},"237":{"n":237,"type":"NQQ","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"]],"fixed":[],"blank":[],"notes":""},"238":{"n":238,"type":"NQQ","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs bag"],["Bag / bracket","Bag"]],"fixed":[],"blank":[],"notes":""},"239":{"n":239,"type":"NQQ","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"]],"fixed":[],"blank":[],"notes":""},"240":{"n":240,"type":"SNQQ","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"]],"fixed":[["Closet door","Needs repair"]],"blank":[],"notes":""},"241":{"n":241,"type":"SNQQ","status":"Perfect","done":10,"total":10,"need":[],"fixed":[["Lotion dispenser","Y"]],"blank":[],"notes":""},"242":{"n":242,"type":"SNQQ","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"]],"fixed":[],"blank":[],"notes":""},"243":{"n":243,"type":"SNQQ","status":"Good","done":9,"total":10,"need":[["Door","Door issues"]],"fixed":[["Shower caddy","Caddy loose, tightened"]],"blank":[],"notes":""},"244":{"n":244,"type":"SNQQ","status":"Good","done":8,"total":10,"need":[["Curtains","No curtains"],["Door","Door issues"]],"fixed":[],"blank":[],"notes":""},"245":{"n":245,"type":"SNQQ","status":"Good","done":9,"total":10,"need":[["Door","Door issues"]],"fixed":[],"blank":[],"notes":""},"246":{"n":246,"type":"NQQ","status":"Good","done":9,"total":10,"need":[["Door","Door issues"]],"fixed":[],"blank":[],"notes":""},"247":{"n":247,"type":"NQQ","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"]],"fixed":[],"blank":[],"notes":""},"248":{"n":248,"type":"NQQ","status":"","done":0,"total":10,"need":[],"fixed":[],"blank":[],"notes":""},"249":{"n":249,"type":"NQQ","status":"Good","done":8,"total":10,"need":[["Hair dryer","Needs hung up"],["Bag / bracket","Bracket"]],"fixed":[],"blank":[],"notes":""}}};
+(function(){
+"use strict";
+const NS="http://www.w3.org/2000/svg";
+const COL={Perfect:"#92D050",Good:"#FFEB84",Bad:"#F8696B","":"#FFFFFF"};
+const NAME={Perfect:"Perfect",Good:"Good",Bad:"Bad","":"Not checked"};
+const rooms=DATA.rooms, W=DATA.W, H=DATA.H;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let floor=1, u=0, selected=null;
+
+// ---- summary ----
+(function(){
+  const c={Perfect:0,Good:0,Bad:0,"":0}; let t=0,d=0;
+  Object.values(rooms).forEach(r=>{c[r.status]++; t+=r.total; d+=r.done;});
+  const pct=t?Math.round(1000*d/t)/10:0;
+  $("sum").innerHTML=[["Perfect","Perfect"],["Good","Good"],["Bad","Bad"],["","Not checked"]]
+    .map(([k,l])=>`<div style="background:${COL[k]}"><div class="n">${c[k]}</div><div class="l">${l}</div></div>`).join("");
+  $("pbar").style.width=pct+"%"; $("ppct").textContent=pct+"%";
+  $("ppct").title=d+" of "+t+" Done boxes ticked";
+  [1,2].forEach(f=>{
+    const rs=Object.values(rooms).filter(r=>Math.floor(r.n/100)===f);
+    const dd=rs.reduce((a,r)=>a+r.done,0), tt=rs.reduce((a,r)=>a+r.total,0);
+    $("s"+f).textContent=rs.length+" rooms · "+(tt?Math.round(100*dd/tt):0)+"% done";
+  });
+})();
+
+// ---- drawing ----
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+function fitText(t,txt,fs,maxw){ t.textContent=txt; if(txt.length*fs*0.62>maxw){t.setAttribute("textLength",maxw);t.setAttribute("lengthAdjust","spacingAndGlyphs");} }
+function draw(){
+  const svg=$("map"); svg.innerHTML=""; svg.setAttribute("viewBox",`-0.3 -0.3 ${W+0.6} ${H+0.6}`);
+  const items=DATA.floors[floor];
+  items.forEach(it=>{
+    if(it.kind==="line"){el("line",{x1:it.x1,y1:it.y1,x2:it.x2,y2:it.y2,stroke:"#46505a","stroke-width":.12},svg);return;}
+    if(it.kind==="title"){const g=el("g",{class:"ttl"},svg);el("rect",{x:it.x,y:it.y,width:it.w,height:it.h},g);
+      const t=el("text",{x:it.x+it.w/2,y:it.y+it.h/2,"font-size":2.1},g);t.textContent=it.label;return;}
+    if(it.kind==="area"){
+      const g=el("g",{class:"area"},svg);
+      if(it.poly) el("path",{d:"M"+it.poly.map(p=>p.join(" ")).join(" L")+" Z"},g);
+      else el("rect",{x:it.x,y:it.y,width:it.w,height:it.h},g);
+      const cx=it.x+it.w/2, cy=it.y+it.h/2;
+      const vert=it.vertical && it.h>it.w;
+      const avail=(vert?it.h:it.w)-0.5, cross=(vert?it.w:it.h);
+      let fs=Math.min(1.05, cross*0.55, 1.2);
+      if(it.label.length*fs*0.58>avail) fs=Math.max(0.55,avail/(it.label.length*0.58));
+      const t=el("text",{class:"alb",x:cx,y:cy,"font-size":fs},g);
+      if(vert) t.setAttribute("transform",`rotate(90 ${cx} ${cy})`);
+      t.textContent=it.label; return;
+    }
+    // room
+    const r=rooms[it.room]||{n:it.room,type:"?",status:"",missing:true};
+    const g=el("g",{class:"room",id:"r"+it.room,"data-room":it.room,role:"button","aria-label":"Room "+it.room},svg);
+    el("rect",{x:it.x+.04,y:it.y+.04,width:it.w-.08,height:it.h-.08,rx:.18,fill:COL[r.status]},g);
+    const cx=it.x+it.w/2, cy=it.y+it.h/2, maxw=it.w-0.5;
+    const tall=it.h>it.w;
+    const numfs=tall?1.45:1.35, typfs=tall?1.0:0.95;
+    let lines=[r.type];
+    if(tall && r.type.length*typfs*0.62>maxw && r.type.includes(" ")) lines=r.type.split(/\s+/);
+    if(tall){
+      const tot=numfs+ lines.length*typfs*1.15 + .35;
+      let y=cy-tot/2+numfs/2;
+      const tn=el("text",{class:"lbl",x:cx,y:y,"font-size":numfs},g); tn.textContent=it.room;
+      y+=numfs/2+.35+typfs*0.6;
+      lines.forEach(L=>{const tt=el("text",{class:"typ",x:cx,y:y,"font-size":typfs},g);fitText(tt,L,typfs,maxw);y+=typfs*1.15;});
+    }else{
+      const tn=el("text",{class:"lbl",x:cx,y:cy-.78,"font-size":numfs},g); tn.textContent=it.room;
+      const tt=el("text",{class:"typ",x:cx,y:cy+.95,"font-size":typfs},g); fitText(tt,r.type,typfs,maxw);
+    }
+    if(selected===it.room) g.classList.add("sel");
+  });
+  applyZoom();
+}
+function fitU(){const box=$("mapbox");return Math.max(3,(box.clientWidth-16)/(W+0.6));}
+function applyZoom(keep){
+  const svg=$("map"); svg.setAttribute("width",Math.round((W+0.6)*u)); svg.setAttribute("height",Math.round((H+0.6)*u));
+}
+function setZoom(nu,fx,fy){
+  const box=$("mapbox"); const old=u;
+  nu=Math.max(fitU(),Math.min(40,nu));
+  // keep the point under (fx,fy) fixed
+  const rect=box.getBoundingClientRect();
+  if(fx===undefined){fx=rect.left+box.clientWidth/2; fy=rect.top+box.clientHeight/2;}
+  const px=box.scrollLeft+fx-rect.left-8, py=box.scrollTop+fy-rect.top-8;
+  u=nu; applyZoom();
+  box.scrollLeft=px*(u/old)-(fx-rect.left-8); box.scrollTop=py*(u/old)-(fy-rect.top-8);
+}
+function defaultU(){return Math.max(fitU(),10);}
+
+// ---- pinch zoom inside the map (iOS/Android) ----
+(function(){
+  const box=$("mapbox"); let d0=0,u0=0;
+  const dist=t=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);
+  box.addEventListener("touchstart",e=>{if(e.touches.length===2){d0=dist(e.touches);u0=u;}},{passive:true});
+  box.addEventListener("touchmove",e=>{if(e.touches.length===2&&d0){e.preventDefault();
+    const mx=(e.touches[0].clientX+e.touches[1].clientX)/2,my=(e.touches[0].clientY+e.touches[1].clientY)/2;
+    setZoom(u0*dist(e.touches)/d0,mx,my);}},{passive:false});
+  box.addEventListener("touchend",e=>{if(e.touches.length<2)d0=0;},{passive:true});
+  // Safari gesture events (prevent page zoom while pinching the map)
+  ["gesturestart","gesturechange"].forEach(n=>box.addEventListener(n,e=>e.preventDefault(),{passive:false}));
+  box.addEventListener("wheel",e=>{if(e.ctrlKey){e.preventDefault();setZoom(u*Math.exp(-e.deltaY/200),e.clientX,e.clientY);}},{passive:false});
+})();
+$("zi").onclick=()=>setZoom(u*1.3); $("zo").onclick=()=>setZoom(u/1.3); $("zf").onclick=()=>setZoom(fitU());
+
+// ---- tabs ----
+function setFloor(f,noHash){
+  floor=f; $("t1").classList.toggle("on",f===1); $("t2").classList.toggle("on",f===2);
+  $("t1").setAttribute("aria-selected",f===1); $("t2").setAttribute("aria-selected",f===2);
+  draw(); $("mapbox").scrollLeft=0; $("mapbox").scrollTop=0;
+}
+$("t1").onclick=()=>setFloor(1); $("t2").onclick=()=>setFloor(2);
+
+// ---- popup ----
+function li(ic,a,b){return `<li><span class="ic">${ic}</span><span><b>${esc(a)}</b>${b?": "+esc(b):""}</span></li>`;}
+function openRoom(n){
+  const r=rooms[n]; if(!r) return false;
+  const f=Math.floor(n/100); if(f!==floor) setFloor(f);
+  selected=n; document.querySelectorAll(".room.sel").forEach(x=>x.classList.remove("sel"));
+  const g=$("r"+n); if(g) g.classList.add("sel");
+  let h=`<div class="sh-head"><div><h2>Room ${r.n}</h2><span class="tc">${esc(r.type||"—")}</span></div><button class="x" id="xc" aria-label="Close">×</button></div>`;
+  h+=`<div class="meta"><span class="badge" style="background:${COL[r.status]}">${NAME[r.status]}</span>`;
+  if(r.status){ h+=`<span class="cnt">${r.done}/${r.total} complete</span></div>`;
+    h+=`<div class="mini"><i style="width:${100*r.done/r.total}%;background:${COL[r.status]==="#FFFFFF"?"#ccc":COL[r.status]}"></i></div>`;
+    h+=`<div class="sec need"><h3>Still needed</h3>`;
+    h+= r.need.length?`<ul>${r.need.map(x=>li("!",x[0],x[1])).join("")}</ul>`:`<div class="none">Nothing outstanding${r.status==="Perfect"?" ✓":""}</div>`;
+    if(r.blank&&r.blank.length) h+=`<div class="blank">Not ticked, no entry in sheet: ${r.blank.map(esc).join(", ")}</div>`;
+    h+=`</div><div class="sec fixd"><h3>Done</h3>`;
+    h+= r.fixed.length?`<ul>${r.fixed.map(x=>li("✓",x[0],x[1])).join("")}</ul>`:`<div class="none">No repairs logged yet</div>`;
+    h+=`</div>`;
+  } else {
+    h+=`</div><div class="unc">Not checked yet</div>`;
+  }
+  if(r.notes) h+=`<div class="sec"><h3>Notes</h3><div class="notes">${esc(r.notes)}</div></div>`;
+  $("sc").innerHTML=h; $("xc").onclick=closeRoom;
+  $("ov").classList.add("show"); $("sheet").classList.add("show"); $("sheet").setAttribute("aria-hidden","false"); $("sheet").scrollTop=0;
+  document.body.style.paddingBottom=$("sheet").offsetHeight+"px";
+  if(g) setTimeout(()=>{const rb=g.getBoundingClientRect(), sh=$("sheet").getBoundingClientRect();
+    const box=$("mapbox"), bb=box.getBoundingClientRect();
+    if(rb.right>bb.right||rb.left<bb.left) box.scrollLeft+= (rb.left+rb.width/2)-(bb.left+bb.width/2);
+    const top=window.innerHeight-sh.height; if(rb.bottom>top-8) window.scrollBy({top:rb.bottom-top+16,behavior:"smooth"});},240);
+  return true;
+}
+function closeRoom(){ $("ov").classList.remove("show"); $("sheet").classList.remove("show"); $("sheet").setAttribute("aria-hidden","true");
+  document.body.style.paddingBottom=""; selected=null; document.querySelectorAll(".room.sel").forEach(x=>x.classList.remove("sel")); }
+$("ov").onclick=closeRoom;
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeRoom();});
+$("map").addEventListener("click",e=>{const g=e.target.closest&&e.target.closest(".room"); if(g) openRoom(+g.dataset.room);});
+// swipe the sheet down to close
+(function(){let y0=null;const s=$("sheet");
+  s.addEventListener("touchstart",e=>{y0=(s.scrollTop<=0)?e.touches[0].clientY:null;},{passive:true});
+  s.addEventListener("touchend",e=>{if(y0!==null&&e.changedTouches[0].clientY-y0>70)closeRoom();y0=null;},{passive:true});})();
+
+// ---- find room ----
+function find(){const v=parseInt($("q").value,10); $("q").value=""; if(!openRoom(v)){ $("q").placeholder=isNaN(v)?"Room #":"No room "+v; } else { $("q").placeholder="Room #"; $("q").blur(); } }
+$("go").onclick=find; $("q").addEventListener("keydown",e=>{if(e.key==="Enter")find();});
+
+// ---- start (hash options: #floor=2  #room=101  #zoom=fit|<px per unit>) ----
+const hp=new URLSearchParams(location.hash.replace(/^#/,""));
+u=defaultU();
+setFloor(hp.get("floor")==="2"?2:1);
+const z=hp.get("zoom"); if(z==="fit") setZoom(fitU()); else if(z&&!isNaN(+z)) setZoom(+z);
+if(hp.get("room")) openRoom(parseInt(hp.get("room"),10));
+let lastW=window.innerWidth; window.addEventListener("resize",()=>{if(Math.abs(window.innerWidth-lastW)>40){lastW=window.innerWidth; if(u<fitU()) setZoom(fitU());}});
+})();
+</script>
+</body>
+</html>
