@@ -89,10 +89,12 @@ footer{font-size:11px;color:var(--muted);text-align:center;padding:12px 10px cal
 .showall{border:1px solid #c5ccd6;background:#fff;border-radius:8px;padding:7px 12px;font-size:14px;font-weight:600;color:var(--navy);font-family:inherit;width:100%;margin-top:2px}
 .rep{display:inline-block;margin:0 0 6px;font-size:12.5px;font-weight:700;color:#8a1c14;background:#fde2e1;border:1px solid #f3a19b;border-radius:8px;padding:5px 9px;line-height:1.35}
 .hcount{font-size:12.5px;color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0}
-.mi-card{display:flex;align-items:center;gap:10px;border-left:5px solid #c0392b}
-.mi-card h2{margin:0;font-size:15px}
-.mi-card p{margin:2px 0 0;font-size:12px;color:var(--muted)}
-.mi-open{margin-left:auto;flex:0 0 auto;border:0;background:#c0392b;color:#fff;border-radius:10px;padding:11px 14px;font-size:15px;font-weight:700;font-family:inherit}
+/* header action buttons (Report issue / Reports) */
+.hdr-acts{display:flex;gap:8px;padding:8px 14px 10px;background:var(--navy);border-top:1px solid rgba(255,255,255,.12)}
+.hdr-acts button{flex:1;border:0;border-radius:10px;padding:11px 10px;font-size:14.5px;font-weight:700;font-family:inherit;line-height:1.15;min-height:42px}
+.hdr-acts .mi-open{background:#c0392b;color:#fff}
+.hdr-acts .rpt-open{background:#fff;color:var(--navy)}
+.hdr-acts .mi-open:active,.hdr-acts .rpt-open:active{opacity:.85}
 .rpt{display:block;width:100%;margin:12px 0 2px;border:0;background:#c0392b;color:#fff;border-radius:10px;padding:12px;font-size:16px;font-weight:700;font-family:inherit}
 #mi{position:fixed;left:0;right:0;bottom:0;z-index:31;background:#fff;border-radius:16px 16px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.25);max-height:92vh;overflow:auto;-webkit-overflow-scrolling:touch;transform:translateY(105%);visibility:hidden;transition:transform .22s ease,visibility 0s linear .22s;padding:6px 16px calc(18px + env(safe-area-inset-bottom))}
 #mi.show{transform:translateY(0);visibility:visible;transition:transform .22s ease,visibility 0s}
@@ -170,10 +172,6 @@ footer{font-size:11px;color:var(--muted);text-align:center;padding:12px 10px cal
 .hist .opn{display:inline-block;font-size:11px;font-weight:800;border-radius:10px;padding:1px 7px;background:#c62828;color:#fff}
 .unc{background:#f5f7fa;border:1px dashed #b9c1cb;border-radius:10px;padding:18px 12px;text-align:center;font-size:17px;font-weight:600;color:#56606b;margin-top:10px}
 /* reports panel */
-.rpt-card{display:flex;align-items:center;gap:10px;border-left:5px solid var(--navy)}
-.rpt-card h2{margin:0;font-size:15px}
-.rpt-card p{margin:2px 0 0;font-size:12px;color:var(--muted)}
-.rpt-open{margin-left:auto;flex:0 0 auto;border:0;background:var(--navy);color:#fff;border-radius:10px;padding:11px 14px;font-size:15px;font-weight:700;font-family:inherit}
 #rp{position:fixed;left:0;right:0;bottom:0;z-index:31;background:#fff;border-radius:16px 16px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.25);max-height:92vh;overflow:auto;-webkit-overflow-scrolling:touch;transform:translateY(105%);visibility:hidden;transition:transform .22s ease,visibility 0s linear .22s;padding:6px 16px calc(18px + env(safe-area-inset-bottom))}
 #rp.show{transform:translateY(0);visibility:visible;transition:transform .22s ease,visibility 0s}
 #rpov{position:fixed;inset:0;background:rgba(15,23,35,.45);opacity:0;pointer-events:none;transition:opacity .18s;z-index:30}
@@ -206,7 +204,11 @@ footer{font-size:11px;color:var(--muted);text-align:center;padding:12px 10px cal
 <header>
   <div class="topline"><a class="home" href="../">← Hotels</a></div>
   <h1>SpringHill Suites — Room Status</h1>
-  <div class="stamp">Last updated Oct 5, 2026 4:05 PM ET</div>
+  <div class="stamp">Last updated Oct 5, 2026 6:05 PM ET</div>
+  <div class="hdr-acts" role="group" aria-label="Report and PDF">
+    <button class="mi-open" id="miopen" type="button">Report issue</button>
+    <button class="rpt-open" id="rptopen" type="button">Reports</button>
+  </div>
 </header>
 <div class="wrap">
   <div class="catlbl" id="catlbl">View by category</div>
@@ -225,14 +227,6 @@ footer{font-size:11px;color:var(--muted);text-align:center;padding:12px 10px cal
   <div class="card" id="sumO">
     <div class="summary" id="sum"></div>
     <div class="prog"><span>Overall</span><div class="bar"><i id="pbar"></i></div><b id="ppct"></b></div>
-  </div>
-  <div class="card mi-card" id="misec">
-    <div><h2>🛠 Maintenance issues</h2><p>Report a problem in a room or common area</p></div>
-    <button class="mi-open" id="miopen" type="button">Report issue</button>
-  </div>
-  <div class="card rpt-card" id="rptsec">
-    <div><h2>Reports</h2><p>Official PDF — overall condition and/or selected categories</p></div>
-    <button class="rpt-open" id="rptopen" type="button">Reports</button>
   </div>
   <div class="tabs" role="tablist" id="floortabs"></div>
   <div class="tools">
