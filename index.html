@@ -13,8 +13,11 @@
 html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 header{background:var(--navy);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 16px 14px}
+header .top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
 header h1{margin:0;font-size:20px;font-weight:700}
+header .loc{margin:0;font-size:13px;font-weight:600;opacity:.95;white-space:nowrap}
 header p{margin:4px 0 0;font-size:13px;opacity:.85}
+.card .addr{margin:2px 0 0;font-size:13px;color:var(--ink);font-weight:500}
 .wrap{padding:16px 14px calc(24px + env(safe-area-inset-bottom));max-width:640px;margin:0 auto}
 .card{display:block;background:#fff;border-radius:14px;overflow:hidden;margin-bottom:14px;
   box-shadow:0 2px 8px rgba(0,0,0,.08);text-decoration:none;color:inherit;
@@ -31,7 +34,10 @@ footer{text-align:center;font-size:11px;color:var(--muted);padding:8px 12px 20px
 </head>
 <body>
 <header>
-  <h1>Lodging LLC</h1>
+  <div class="top">
+    <h1>Lodging LLC</h1>
+    <p class="loc">Sandusky, Ohio</p>
+  </div>
   <p>Pick a property to open its live floor map</p>
 </header>
 <div class="wrap">
@@ -39,7 +45,8 @@ footer{text-align:center;font-size:11px;color:var(--muted);padding:8px 12px 20px
     <img src="assets/quality-inn.jpg" alt="Quality Inn &amp; Suites Sandusky exterior" width="900" height="600" loading="eager">
     <div class="body">
       <h2>Quality Inn &amp; Suites</h2>
-      <p class="sub">Sandusky · floors 1–2 · room checks &amp; maintenance map</p>
+      <p class="addr">6220 Milan Rd, Sandusky, OH 44870</p>
+      <p class="sub">Floors 1–2 · room checks &amp; maintenance map</p>
       <span class="go">Open map →</span>
     </div>
   </a>
@@ -47,7 +54,8 @@ footer{text-align:center;font-size:11px;color:var(--muted);padding:8px 12px 20px
     <img src="assets/springhill.jpg" alt="SpringHill Suites exterior" width="900" height="500" loading="eager">
     <div class="body">
       <h2>SpringHill Suites</h2>
-      <p class="sub">Sandusky area · floors 1–4 · room checks &amp; maintenance map</p>
+      <p class="addr">6300 Milan Rd, Sandusky, OH 44870</p>
+      <p class="sub">Floors 1–4 · room checks &amp; maintenance map</p>
       <span class="go">Open map →</span>
     </div>
   </a>
