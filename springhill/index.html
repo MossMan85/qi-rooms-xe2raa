@@ -202,7 +202,7 @@ footer{font-size:11px;color:var(--muted);text-align:center;padding:12px 10px cal
 <header>
   <div class="topline"><a class="home" href="../">← Hotels</a></div>
   <h1>SpringHill Suites — Room Status</h1>
-  <div class="stamp">Last updated Oct 5, 2026 3:05 PM ET</div>
+  <div class="stamp">Last updated Oct 5, 2026 3:06 PM ET</div>
 </header>
 <div class="wrap">
   <div class="catlbl" id="catlbl">View by category</div>
@@ -734,26 +734,24 @@ function buildReport(sel){
 }
 function printReport(rep){
   const body=rep.secs.map(s=>`<section><h2>${esc(s.title)}</h2>${s.html}</section>`).join("");
-  const html=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(RP.name)} Report</title>
-<style>
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:#1f2933;margin:16px;font-size:14px;line-height:1.35}
-h1{font-size:18px;margin:0 0 4px;color:#1d3557}
-.meta{color:#6b7580;font-size:12.5px;margin:0 0 16px}
-h2{font-size:15px;margin:18px 0 6px;padding-bottom:4px;border-bottom:2px solid #1d3557;color:#1d3557}
-h3{font-size:13.5px;margin:12px 0 4px}
-ul{margin:0 0 8px;padding-left:18px}li{margin:2px 0}
-.none{color:#6b7580;font-style:italic}
-@media print{body{margin:10mm} h2{page-break-after:avoid} section{page-break-inside:avoid}}
-</style></head><body>
-<h1>${esc(RP.name)} — Room Condition Report</h1>
-<p class="meta">Generated ${esc(rep.when)}</p>
-${body}
-<script>window.onload=function(){window.focus();window.print();}<\\/script>
-</body></html>`;
+  const parts=[
+    "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>",
+    esc(RP.name)," Report</title><style>",
+    "body{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif;color:#1f2933;margin:16px;font-size:14px;line-height:1.35}",
+    "h1{font-size:18px;margin:0 0 4px;color:#1d3557}.meta{color:#6b7580;font-size:12.5px;margin:0 0 16px}",
+    "h2{font-size:15px;margin:18px 0 6px;padding-bottom:4px;border-bottom:2px solid #1d3557;color:#1d3557}",
+    "h3{font-size:13.5px;margin:12px 0 4px}ul{margin:0 0 8px;padding-left:18px}li{margin:2px 0}",
+    ".none{color:#6b7580;font-style:italic}@media print{body{margin:10mm}h2{page-break-after:avoid}section{page-break-inside:avoid}}",
+    "</style></head><body><h1>",esc(RP.name)," — Room Condition Report</h1>",
+    "<p class=\"meta\">Generated ",esc(rep.when),"</p>",body,
+    "<scr","ipt>window.onload=function(){window.focus();window.print();}</scr","ipt>",
+    "</body></html>"
+  ];
   const w=window.open("","_blank");
   if(!w){ $("rperr").textContent="Pop-up blocked — allow pop-ups to print, or use Email."; $("rperr").style.display="block"; return; }
-  w.document.open(); w.document.write(html); w.document.close();
+  w.document.open(); w.document.write(parts.join("")); w.document.close();
 }
+
 function emailReport(rep){
   const subj=`[${RP.tag}] ${RP.name} — ${rep.subjectParts.join(", ")||"Report"}`;
   let body=rep.lines.join("\r\n");
