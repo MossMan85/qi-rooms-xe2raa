@@ -96,6 +96,13 @@ footer{font-size:11px;color:var(--muted);text-align:center;padding:12px 10px cal
 .hdr-acts .rpt-open{background:#fff;color:var(--navy)}
 .hdr-acts .mi-open:active,.hdr-acts .rpt-open:active{opacity:.85}
 .rpt{display:block;width:100%;margin:12px 0 2px;border:0;background:#c0392b;color:#fff;border-radius:10px;padding:12px;font-size:16px;font-weight:700;font-family:inherit}
+.hpbar{display:flex;gap:8px;margin:8px 0 2px}
+.hpbar button{flex:1;border-radius:10px;padding:11px 8px;font-size:15px;font-weight:700;font-family:inherit;line-height:1.15}
+.hpbar .hp-pdf{border:0;background:var(--navy);color:#fff;flex:1.4}
+.hpbar .hp-prt{border:1px solid var(--navy);background:#fff;color:var(--navy)}
+.hpbar button:disabled{opacity:.55}
+.hpstat{display:none;font-size:13px;line-height:1.35;margin:6px 2px 0;color:#2f5d1e}
+.hpstat.err{color:#c62828;font-weight:600}
 #mi{position:fixed;left:0;right:0;bottom:0;z-index:31;background:#fff;border-radius:16px 16px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.25);max-height:92vh;overflow:auto;-webkit-overflow-scrolling:touch;transform:translateY(105%);visibility:hidden;transition:transform .22s ease,visibility 0s linear .22s;padding:6px 16px calc(18px + env(safe-area-inset-bottom))}
 #mi.show{transform:translateY(0);visibility:visible;transition:transform .22s ease,visibility 0s}
 #miov{position:fixed;inset:0;background:rgba(15,23,35,.45);opacity:0;pointer-events:none;transition:opacity .18s;z-index:30}
@@ -204,7 +211,7 @@ footer{font-size:11px;color:var(--muted);text-align:center;padding:12px 10px cal
 <header>
   <div class="topline"><a class="home" href="../">← Hotels</a></div>
   <h1>SpringHill Suites — Room Status</h1>
-  <div class="stamp">Last updated Oct 5, 2026 6:05 PM ET</div>
+  <div class="stamp">Last updated Oct 5, 2026 8:59 PM ET</div>
   <div class="hdr-acts" role="group" aria-label="Report and PDF">
     <button class="mi-open" id="miopen" type="button">Report issue</button>
     <button class="rpt-open" id="rptopen" type="button">Reports</button>
@@ -431,6 +438,7 @@ $("floortabs").addEventListener("click",e=>{const b=e.target.closest("button[dat
 
 // ---- popup ----
 const HSHOW=5;
+const HPBAR=`<div class="hpbar"><button class="hp-pdf" id="hppdf" type="button">📄 History PDF</button><button class="hp-prt" id="hpprt" type="button">🖨 Print history</button></div><div class="hpstat" id="hpstat" role="status"></div>`;
 function fmtD(iso){if(!iso)return "Undated";const [y,m,d]=iso.split("-");return (+m)+"/"+(+d)+"/"+y.slice(2);}
 function histHtml(r){
   const hs=r.hist||[];
@@ -475,9 +483,12 @@ function openRoom(n){
     h=h.replace(`<div class="meta">`,`<div class="cst${c[0]==="u"?" hatch":""}" style="${CSW[c[0]]||""}"><b>${esc(cat.label)}: ${CNAME[c[0]]}</b>${c[1]?" — "+esc(c[1]):""}${c[2]?`<br><small>${c[2]} past ${esc(cat.label)} issue${c[2]>1?"s":""} in log · last ${fmtD(c[3])}</small>`:""}</div><div class="meta">`); }
   if(r.notes) h+=`<div class="sec"><h3>Notes</h3><div class="notes">${esc(r.notes)}</div></div>`;
   h+=`<button class="rpt" id="rpt" type="button">🛠 Report issue for this room</button>`;
+  h+=HPBAR;
   h+=histHtml(r);
   $("sc").innerHTML=h; $("xc").onclick=closeRoom;
   $("rpt").onclick=()=>{closeRoom(); openIssue(r.n);};
+  $("hppdf").onclick=()=>historyPdf(roomHistoryRep(r),"pdf");
+  $("hpprt").onclick=()=>historyPdf(roomHistoryRep(r),"print");
   const sa=$("sall"); if(sa) sa.onclick=()=>{const u=$("hlist"); const on=u.classList.toggle("all"); sa.textContent=on?sa.dataset.on:sa.dataset.off;};
   $("ov").classList.add("show"); $("sheet").classList.add("show"); $("sheet").setAttribute("aria-hidden","false"); $("sheet").scrollTop=0;
   document.body.style.paddingBottom=$("sheet").offsetHeight+"px";
@@ -505,12 +516,15 @@ function openArea(k){
   h+=`<div class="meta"><span class="badge" style="background:${op.length?"#F8696B":"#92D050"}">${op.length?op.length+" open in log":"Nothing open"}</span><span class="cnt">${hs.length} logged</span></div>`;
   h+=`<div class="sec need"><h3>Still open</h3>`+(op.length?`<ul>${op.map(x=>li("!",fmtD(x[0])+(x[4]?" · "+x[4]:""),x[2])).join("")}</ul>`:`<div class="none">Nothing open in the maintenance log ✓</div>`)+`</div>`;
   h+=`<button class="rpt" id="rpt" type="button">🛠 Report issue for a common area</button>`;
+  h+=HPBAR;
   h+=`<div class="sec"><h3>Past issues <span class="hcount">· ${hs.length} in maintenance log</span></h3>`;
   h+=`<ul class="hist" id="hlist">`+hs.map((x,i)=>`<li class="${i>=HSHOW?"more":""}"><div class="hd"><b>${fmtD(x[0])}</b><span class="cat">${esc(x[1])}</span>${x[5]?'<span class="opn">OPEN</span>':""}</div>${x[4]?`<div class="loc">${esc(x[4])}</div>`:""}<div class="tx">${esc(x[2])}</div></li>`).join("")+`</ul>`;
   if(hs.length>HSHOW) h+=`<button class="showall" id="sall" data-on="Show fewer" data-off="Show all ${hs.length} past issues">Show all ${hs.length} past issues</button>`;
   h+=`</div>`;
   $("sc").innerHTML=h; $("xc").onclick=closeRoom;
   $("rpt").onclick=()=>{closeRoom(); openIssue(MI.other);};
+  $("hppdf").onclick=()=>historyPdf(areaHistoryRep(a),"pdf");
+  $("hpprt").onclick=()=>historyPdf(areaHistoryRep(a),"print");
   const sa=$("sall"); if(sa) sa.onclick=()=>{const u=$("hlist"); const on=u.classList.toggle("all"); sa.textContent=on?sa.dataset.on:sa.dataset.off;};
   $("ov").classList.add("show"); $("sheet").classList.add("show"); $("sheet").setAttribute("aria-hidden","false"); $("sheet").scrollTop=0;
   document.body.style.paddingBottom=$("sheet").offsetHeight+"px";
@@ -783,10 +797,25 @@ function buildReport(sel){
   const fname=`${RP.file_prefix||"Report"}_Room_Condition_${rptStampFile()}.pdf`;
   return {when, lines, secs, subjectParts, fname};
 }
+// html2pdf renders the doc inside the map page: rename classes that clash with map styles and scope the
+// CSS under .pdfroot, so the map's header/.badge/.meta styles don't leak into the PDF (and vice versa).
+const OD_REN=[["badge","od-badge"],["meta","od-meta"],["none","od-none"],["hint","od-hint"]];
+function odHtml(h){
+  OD_REN.forEach(([a,b])=>{h=h.split(`class="${a}"`).join(`class="${b}"`);});
+  return h.split(`<header class="letterhead">`).join(`<div class="letterhead">`).split(`</header>`).join(`</div>`);
+}
+function odCss(scoped){
+  let c=rptOfficialCss();
+  OD_REN.forEach(([a,b])=>{c=c.replace(new RegExp("\\."+a+"(?![\\w-])","g"),"."+b);});
+  if(!scoped) return c;
+  c=c.replace(/@page\{[^{}]*\}/g,"").replace(/@media[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g,"");
+  return c.replace(/([^{}]+)\{([^{}]*)\}/g,(m,sel,body)=>sel.split(",").map(x=>{x=x.trim();
+    if(x==="*") return ".pdfroot,.pdfroot *"; if(x==="body") return ".pdfroot"; return ".pdfroot "+x;}).join(",")+"{"+body+"}");
+}
 function officialDocHtml(rep, forPrint){
   const sections=rep.secs.map(s=>`<section><h3>${esc(s.title)}</h3>${s.html}</section>`).join("");
   const toolbar=forPrint?`<div class="noprint"><button type="button" onclick="window.print()">Print / Save as PDF</button><span class="hint">On iPhone: Share → Print → pinch preview → Share PDF. On desktop: Print → Save as PDF.</span></div>`:"";
-  return `<div class="doc">${toolbar}
+  return odHtml(`<div class="doc">${toolbar}
     <header class="letterhead">
       <div class="lh-top">
         <div class="co"><p class="org">${esc(RP.company||"Lodging LLC")}</p><p class="loc">${esc(RP.company_loc||"Sandusky, Ohio")}</p></div>
@@ -798,24 +827,30 @@ function officialDocHtml(rep, forPrint){
       </div>
     </header>
     <div class="rtitle">
-      <h2>Room Condition Report</h2>
+      <h2>${esc(rep.title||"Room Condition Report")}</h2>
       <p class="meta">Generated ${esc(rep.when)} · From live room-status map · ${esc(rep.subjectParts.join(" · ")||"Report")}</p>
     </div>
     ${sections}
     <div class="foot"><span>${esc(RP.company||"Lodging LLC")} · ${esc(RP.name)} · Confidential — internal use</span><span>${esc(rep.fname||"")}</span></div>
-  </div>`;
+  </div>`);
 }
-function openOfficialWindow(rep, autoPrint){
+const RP_UI={ok:"rpok",err:"rperr",btns:["rppdf","rpprint","rpemail"]};
+function uiMsg(ui,kind,html){
+  if(ui.stat){const e=$(ui.stat); if(!e) return; e.className="hpstat"+(kind==="err"?" err":""); e.innerHTML=html; e.style.display=html?"block":"none"; return;}
+  const e=$(kind==="err"?ui.err:ui.ok); if(!e) return; e.innerHTML=html; e.style.display=html?"block":"none";
+}
+function openOfficialWindow(rep, autoPrint, ui){
+  ui=ui||RP_UI;
   const parts=[
     "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">",
-    "<title>",esc(RP.name)," — Room Condition Report</title>",
-    "<style>",rptOfficialCss(),"</style></head><body>",
+    "<title>",esc(RP.name)," — ",esc(rep.title||"Room Condition Report"),"</title>",
+    "<style>",odCss(false),"</style></head><body>",
     officialDocHtml(rep, true),
     autoPrint?("<scr"+"ipt>window.onload=function(){setTimeout(function(){window.focus();window.print();},250);}</scr"+"ipt>"):"",
     "</body></html>"
   ];
   const w=window.open("","_blank");
-  if(!w){ $("rperr").textContent="Pop-up blocked — allow pop-ups, or use Download PDF."; $("rperr").style.display="block"; return null; }
+  if(!w){ uiMsg(ui,"err","Pop-up blocked — allow pop-ups, or use the PDF button."); return null; }
   w.document.open(); w.document.write(parts.join("")); w.document.close();
   return w;
 }
@@ -829,16 +864,20 @@ function loadHtml2Pdf(){
     document.head.appendChild(s);
   });
 }
-function setRpBusy(on, msg){
-  ["rppdf","rpprint","rpemail"].forEach(id=>{const b=$(id); if(b) b.disabled=!!on;});
-  if(on){ $("rpok").innerHTML=esc(msg||"Preparing PDF…"); $("rpok").style.display="block"; }
+function setRpBusy(on, msg, ui){
+  ui=ui||RP_UI;
+  ui.btns.forEach(id=>{const b=$(id); if(b) b.disabled=!!on;});
+  if(on) uiMsg(ui,"ok",esc(msg||"Preparing PDF…"));
 }
-async function downloadPdf(rep){
-  setRpBusy(true, "Preparing official PDF…");
+async function downloadPdf(rep, ui){
+  ui=ui||RP_UI;
+  uiMsg(ui,"err","");
+  setRpBusy(true, "Preparing official PDF…", ui);
   const host=document.createElement("div");
-  host.style.cssText="position:fixed;left:-10000px;top:0;width:8.5in;background:#fff;";
+  host.style.cssText="position:fixed;left:-10000px;top:0;width:7.5in;background:#fff;";
   const wrap=document.createElement("div");
-  wrap.innerHTML=`<style>${rptOfficialCss()}</style>${officialDocHtml(rep,false)}`;
+  wrap.className="pdfroot"; wrap.style.cssText="width:7.5in;max-width:7.5in;overflow:hidden;background:#fff";
+  wrap.innerHTML=`<style>${odCss(true)}</style>${officialDocHtml(rep,false)}`;
   host.appendChild(wrap);
   document.body.appendChild(host);
   try{
@@ -847,22 +886,20 @@ async function downloadPdf(rep){
       margin:[0.45,0.5,0.55,0.5],
       filename:rep.fname,
       image:{type:"jpeg",quality:0.96},
-      html2canvas:{scale:2,useCORS:true,letterRendering:true,backgroundColor:"#ffffff"},
+      html2canvas:{scale:2,useCORS:true,letterRendering:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0},
       jsPDF:{unit:"in",format:"letter",orientation:"portrait"},
       pagebreak:{mode:["avoid-all","css","legacy"]}
     };
-    await html2pdf().set(opt).from(wrap.querySelector(".doc")||wrap).save();
-    $("rpok").innerHTML=`PDF saved as <b>${esc(rep.fname)}</b>. Check your Downloads (or Files app on iPhone).`;
-    $("rpok").style.display="block";
+    await html2pdf().set(opt).from(wrap).save();
+    uiMsg(ui,"ok",`PDF saved as <b>${esc(rep.fname)}</b>. Check your Downloads (or Files app on iPhone).`);
     return true;
   }catch(err){
-    $("rperr").textContent="PDF download unavailable ("+(err&&err.message?err.message:"error")+"). Opening print view — choose Save as PDF.";
-    $("rperr").style.display="block";
-    openOfficialWindow(rep, true);
+    uiMsg(ui,"err",esc("PDF download unavailable ("+(err&&err.message?err.message:"error")+"). Opening print view — choose Save as PDF."));
+    openOfficialWindow(rep, true, ui);
     return false;
   }finally{
     host.remove();
-    setRpBusy(false);
+    setRpBusy(false, "", ui);
   }
 }
 function emailReport(rep){
@@ -917,6 +954,53 @@ async function runReport(kind){
 $("rppdf").onclick=()=>runReport("pdf");
 $("rpprint").onclick=()=>runReport("print");
 $("rpemail").onclick=()=>runReport("email");
+
+// ---- room / common-area history PDF ----
+const HP_UI={stat:"hpstat",btns:["hppdf","hpprt"]};
+function histStatus(r,x){ // room log has no open flag: say "Open now" only when that category has an open Room Needs item
+  const open=CATS.some(c=>hmatch(x,c)&&cs(r,c.k)[0]==="o"); return open?"Open now":"Logged";}
+function histTable(rows){
+  if(!rows.length) return `<p class="none">No past issues in the maintenance log</p>`;
+  return `<table><thead><tr><th style="width:70px">Date</th><th style="width:120px">Category</th><th>Description</th><th style="width:72px">Status</th></tr></thead><tbody>`+
+    rows.map(x=>`<tr><td>${esc(x.d)}</td><td>${esc(x.c)}</td><td>${x.loc?`<i>${esc(x.loc)}</i> — `:""}${esc(x.t)}</td><td>${x.open?`<b style="color:#8a1c14">${esc(x.s)}</b>`:esc(x.s)}</td></tr>`).join("")+`</tbody></table>`;
+}
+function hpFile(tag){return `${RP.file_prefix||"Report"}_${tag}_History_${rptStampFile()}.pdf`;}
+function roomHistoryRep(r){
+  const secs=[], hs=r.hist||[];
+  let c=`<div class="stats">
+    <div class="stat ${r.status==="Bad"?"bad":r.status==="Good"?"good":r.status==="Perfect"?"perfect":""}"><div class="n" style="font-size:13pt">${esc(NAME[r.status])}</div><div class="l">Rating</div></div>
+    <div class="stat"><div class="n">${r.status?r.done+"/"+r.total:"—"}</div><div class="l">Items done</div></div>
+    <div class="stat${(r.need||[]).length?" bad":""}"><div class="n">${(r.need||[]).length}</div><div class="l">Open items</div></div>
+    <div class="stat"><div class="n">${hs.length}</div><div class="l">Logged issues</div></div></div>`;
+  if(r.rep) c+=`<p class="note"><b style="color:#8a1c14">Repeat problem:</b> ${esc(r.rep)}</p>`;
+  if(!r.status) c+=`<p class="none">Not checked yet on the Room Needs sheet.</p>`;
+  else {
+    c+=`<div class="subh">Open items (Room Needs)</div>`;
+    c+=(r.need||[]).length?`<table><thead><tr><th style="width:170px">Item</th><th>Detail</th></tr></thead><tbody>${r.need.map(x=>`<tr><td><b>${esc(x[0])}</b></td><td>${esc(x[1]||"—")}</td></tr>`).join("")}</tbody></table>`:`<p class="none">Nothing outstanding</p>`;
+    if((r.fixed||[]).length) c+=`<div class="subh">Done</div><p class="nums">${esc(r.fixed.map(x=>x[0]+(x[1]?" ("+x[1]+")":"")).join("; "))}</p>`;
+    if((r.blank||[]).length) c+=`<p class="note">Not ticked, no entry in sheet: ${esc(r.blank.join(", "))}</p>`;
+  }
+  if(r.notes) c+=`<div class="subh">Notes</div><p class="nums">${esc(r.notes)}</p>`;
+  secs.push({title:`Room ${r.n}${r.type?" · "+r.type:""} — current condition`, html:c});
+  const rows=hs.map(x=>{const st=histStatus(r,x); return {d:fmtD(x[0]),c:x[1]+(x[3]?" + "+x[3]:""),t:x[2],s:st,open:st==="Open now"};});
+  secs.push({title:`Maintenance history (${hs.length} ${hs.length===1?"entry":"entries"}, newest first)`,
+    html:`<p class="note">From the maintenance log (names removed). Status "Open now" = that category still has an open item on the Room Needs sheet.</p>`+histTable(rows)});
+  return {title:"Room History Report", when:rptWhen(), secs, subjectParts:[`Room ${r.n}`], fname:hpFile(`Room_${r.n}`)};
+}
+function areaHistoryRep(a){
+  const hs=(a.hist||[]).slice().sort((x,y)=>(y[0]||"").localeCompare(x[0]||"")), op=hs.filter(x=>x[5]);
+  let c=`<div class="stats"><div class="stat${op.length?" bad":" perfect"}"><div class="n">${op.length}</div><div class="l">Open in log</div></div>
+    <div class="stat"><div class="n">${hs.length}</div><div class="l">Logged issues</div></div></div>
+    <p class="note">${esc(floorsTxt(a))}</p>`;
+  const secs=[{title:`${a.label} — common area`, html:c},
+        {title:`Maintenance history (${hs.length} ${hs.length===1?"entry":"entries"}, newest first)`,
+         html:`<p class="note">From the maintenance log (names removed).</p>`+histTable(hs.map(x=>({d:fmtD(x[0]),c:x[1],t:x[2],loc:x[4],s:x[5]?"Open":"Closed",open:!!x[5]})))}];
+  return {title:"Common Area History Report", when:rptWhen(), secs, subjectParts:[a.label], fname:hpFile(a.label.replace(/[^A-Za-z0-9]+/g,"_").replace(/^_|_$/g,""))};
+}
+function historyPdf(rep, kind){
+  if(kind==="print"){ uiMsg(HP_UI,"err",""); openOfficialWindow(rep, true, HP_UI); }
+  else downloadPdf(rep, HP_UI);
+}
 
 // ---- find room ----
 function find(){const v=parseInt($("q").value,10); $("q").value=""; if(!openRoom(v)){ $("q").placeholder=isNaN(v)?"Room #":"No room "+v; } else { $("q").placeholder="Room #"; $("q").blur(); } }
